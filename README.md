@@ -1,4 +1,4 @@
-# CustomerManagementSystem
+# Customer Management System
 
 Geeks4Learning SAQA FISA project,
 
