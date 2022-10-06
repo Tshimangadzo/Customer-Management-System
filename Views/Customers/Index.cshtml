@@ -8,22 +8,39 @@
     <a  button type="button" class="btn btn-primary" asp-action="Create">Create New Customer</a>
 </p>
 <table class="table">
-    <thead>
+    <thead class="thead-dark">
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                <a type="button" class="btn btn-dark">
+                    @Html.DisplayNameFor(model => model.Name)
+                    <i class="fas fa-angle-down rotate-icon"></i>
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Surname)
+                <a type="button" class="btn btn-dark">
+                    @Html.DisplayNameFor(model => model.Surname)
+                    <i class="fas fa-angle-down rotate-icon"></i>
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Email)
+              
+                <a type="button" class="btn btn-dark">
+                    @Html.DisplayNameFor(model => model.Email)
+                    <i class="fas fa-angle-down rotate-icon"></i>
+                </a>
             </th>
             <th>
-                Phone number
+                <a type="button" class="btn btn-dark">
+                    Phone number
+                    <i class="fas fa-angle-down rotate-icon"></i>
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+             
+                <a type="button" class="btn btn-dark" asp-action="Index" asp-route-id="address">
+                    @Html.DisplayNameFor(model => model.Address)
+                    <i class="fas fa-angle-down rotate-icon"></i>
+                </a>
             </th>
             <th></th>
         </tr>
