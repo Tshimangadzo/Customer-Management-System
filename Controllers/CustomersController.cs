@@ -7,38 +7,54 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CustomerManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
+using CustomerManagementSystem.Repositories;
+using CustomerManagementSystem.Interfaces;
 
 namespace CustomerManagementSystem.Controllers
 {
     public class CustomersController : Controller
     {
-        private readonly CustomerManagementSystemContext _context;
+        private readonly ICustomer _repositoryCustomer;
 
-        public CustomersController(CustomerManagementSystemContext context)
+        public CustomersController(ICustomer repositoryCustomer)
         {
-            _context = context;
+
+            _repositoryCustomer = repositoryCustomer;
         }
 
         // GET: Customers
         [Authorize]
-        public async Task<IActionResult> Index()
+        public IActionResult Index(string ColunmName, string ActionName, string TypeAction)
         {
-            var customerManagementSystemContext = _context.Customer.Include(c => c.Address);
-            return View(await customerManagementSystemContext.ToListAsync());
+            List<Customer> customers = null;
+
+            if (String.IsNullOrEmpty(ColunmName)
+                && String.IsNullOrEmpty(ActionName)
+                && String.IsNullOrEmpty(TypeAction))
+            {
+                customers = _repositoryCustomer.Read(null);
+                return View(customers);
+            }
+
+            if (ColunmName != null) {
+                customers = _repositoryCustomer.Read(null);
+            }
+
+            ViewData["TypeAction"] = TypeAction;
+            return View(customers);
+
         }
 
         // GET: Customers/Details/5
         [Authorize]
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var customer = await _context.Customer
-                .Include(c => c.Address)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var customer = _repositoryCustomer.Read(id).FirstOrDefault();
             if (customer == null)
             {
                 return NotFound();
@@ -51,7 +67,7 @@ namespace CustomerManagementSystem.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "City");
+         
             return View();
         }
 
@@ -65,29 +81,28 @@ namespace CustomerManagementSystem.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
-                await _context.SaveChangesAsync();
+                var _customer = _repositoryCustomer.Create(customer);
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "City", customer.AddressId);
+ 
             return View(customer);
         }
 
         // GET: Customers/Edit/5
         [Authorize]
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var customer = await _context.Customer.FindAsync(id);
+            var customer = _repositoryCustomer.Read(id).FirstOrDefault();
             if (customer == null)
             {
                 return NotFound();
             }
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "City", customer.AddressId);
             return View(customer);
         }
 
@@ -97,7 +112,7 @@ namespace CustomerManagementSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
+        public IActionResult Edit(int id, [Bind("Id,Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
         {
             if (id != customer.Id)
             {
@@ -108,8 +123,7 @@ namespace CustomerManagementSystem.Controllers
             {
                 try
                 {
-                    _context.Update(customer);
-                    await _context.SaveChangesAsync();
+                    _repositoryCustomer.Update(customer, id);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,45 +138,46 @@ namespace CustomerManagementSystem.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AddressId"] = new SelectList(_context.Address, "Id", "City", customer.AddressId);
-            return View(customer);
+
+            return View();
         }
 
         // GET: Customers/Delete/5
         [Authorize]
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var customer = await _context.Customer
-                .Include(c => c.Address)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var customer = _repositoryCustomer.Read(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(customer.FirstOrDefault());
         }
 
         // POST: Customers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var customer = await _context.Customer.FindAsync(id);
-            _context.Customer.Remove(customer);
-            await _context.SaveChangesAsync();
+
+            var customer = _repositoryCustomer.Delete(id);
             return RedirectToAction(nameof(Index));
+
         }
         [Authorize]
         private bool CustomerExists(int id)
         {
-            return _context.Customer.Any(e => e.Id == id);
+            var customer = _repositoryCustomer.Read(id);
+            //return _context.Customer.Any(e => e.Id == id);
+            return true;
         }
     }
 }

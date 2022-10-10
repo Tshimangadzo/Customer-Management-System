@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using CustomerManagementSystem.Interfaces;
+using CustomerManagementSystem.Repositories;
 
 namespace CustomerManagementSystem
 {
@@ -35,6 +37,9 @@ namespace CustomerManagementSystem
             services.AddDbContext<CustomerManagementSystemContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddScoped<ICustomer, RepositoryCustomer>();
+   
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
