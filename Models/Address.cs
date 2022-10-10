@@ -11,7 +11,6 @@ namespace CustomerManagementSystem.Models
     {
         public Address()
         {
-            Customer = new HashSet<Customer>();
             Orders = new HashSet<Orders>();
         }
 
@@ -21,7 +20,6 @@ namespace CustomerManagementSystem.Models
         public string ZipCode { get; set; }
         public string City { get; set; }
 
-        public virtual ICollection<Customer> Customer { get; set; }
         public virtual ICollection<Orders> Orders { get; set; }
     }
 }

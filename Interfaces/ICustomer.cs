@@ -10,11 +10,11 @@ namespace CustomerManagementSystem.Interfaces
     public interface ICustomer
     {
 
-        public List<Customer> Create(Customer customer);
-        public List<Customer> Update(Customer customer, string id);
-        public Customer Read(string id);
-        public List<Customer> Read();
-        public Customer Delete(string id);
+        public int Create(Customer customer);
+        public int Update(Customer customer, int id);
+        public  List<Customer>Read(int? id);
+        public int Delete(int id);
+        public List<Customer> SortCustomers(string ColunmName, string type );
     }
 
   

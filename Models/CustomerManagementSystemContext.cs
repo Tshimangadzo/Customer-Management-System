@@ -35,7 +35,7 @@ namespace CustomerManagementSystem.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=DESKTOP-7TNF0FU;Database=CustomerManagementSystem;Trusted_Connection=True");
+                optionsBuilder.UseSqlServer("Server=DESKTOP-7TNF0FU;Database=CustomerManagementSystem;Trusted_Connection=True;");
             }
         }
 
@@ -164,6 +164,8 @@ namespace CustomerManagementSystem.Models
 
             modelBuilder.Entity<Customer>(entity =>
             {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(255)
@@ -178,15 +180,12 @@ namespace CustomerManagementSystem.Models
                     .IsRequired()
                     .HasMaxLength(255)
                     .IsUnicode(false);
-
-                entity.HasOne(d => d.Address)
-                    .WithMany(p => p.Customer)
-                    .HasForeignKey(d => d.AddressId)
-                    .HasConstraintName("FK__Customer__Addres__74AE54BC");
             });
 
             modelBuilder.Entity<Orders>(entity =>
             {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(255)
@@ -201,13 +200,13 @@ namespace CustomerManagementSystem.Models
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.AddressId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Orders__AddressI__778AC167");
+                    .HasConstraintName("FK__Orders__AddressI__160F4887");
 
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Orders__Customer__787EE5A0");
+                    .HasConstraintName("FK__Orders__Customer__17036CC0");
             });
 
             OnModelCreatingPartial(modelBuilder);

@@ -11,9 +11,23 @@
     <thead class="thead-dark">
         <tr>
             <th>
-                <a type="button" class="btn btn-dark">
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Name">
                     @Html.DisplayNameFor(model => model.Name)
-                    <i class="fas fa-angle-down rotate-icon"></i>
+                    @{
+                        String sort = ViewData["TypeAction"] != "desc" ? "asc" : "desc";
+
+
+                        switch (sort)
+                        {
+                            case "asc":
+                                <i class="fas fa-angle-down rotate-icon"></i>
+                                break;
+                            case "desc":
+                                <i class="fas fa-angle-up rotate-icon"></i>
+                                break;
+                        }
+                    }
+
                 </a>
             </th>
             <th>
@@ -23,7 +37,7 @@
                 </a>
             </th>
             <th>
-              
+
                 <a type="button" class="btn btn-dark">
                     @Html.DisplayNameFor(model => model.Email)
                     <i class="fas fa-angle-down rotate-icon"></i>
@@ -35,43 +49,33 @@
                     <i class="fas fa-angle-down rotate-icon"></i>
                 </a>
             </th>
-            <th>
-             
-                <a type="button" class="btn btn-dark" asp-action="Index" asp-route-id="address">
-                    @Html.DisplayNameFor(model => model.Address)
-                    <i class="fas fa-angle-down rotate-icon"></i>
-                </a>
-            </th>
+
             <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Surname)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                <a type="button" class="btn btn-success" asp-action="Details" asp-controller="Addresses" asp-route-id="@item.Address.Id">
-                    @Html.DisplayFor(modelItem => item.Address.City)
-                </a>
-            </td>
-            <td>
-                <a type="button" class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a type="button" class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Surname)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                </td>
+
+                <td>
+                    <a type="button" class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a type="button" class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
         }
     </tbody>
 </table>
