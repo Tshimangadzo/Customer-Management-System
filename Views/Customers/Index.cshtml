@@ -4,49 +4,89 @@
     ViewData["Title"] = "View customers";
 }
 
-<p>
-    <a  button type="button" class="btn btn-primary" asp-action="Create">Create New Customer</a>
-</p>
+@{
+    String sort = ViewData["TypeAction"] == null ? "": ViewData["TypeAction"].ToString();
+    String colunmName = ViewData["ColunmName"] == null ? "" : ViewData["ColunmName"].ToString();
+}
+<div style="margin-bottom:20px">
+    <a button type="button" class="btn btn-primary" asp-action="Create">Create New Customer</a>
+    <form class="float-right" method="post" asp-action="Index">
+        <input name="searchValue"  />
+        <select name="SearchColunmName">
+            <option value="">Search by</option>
+            <option value="Name">Name</option>
+            <option value="Surname">Surname</option>
+            <option value="Email">Email</option>
+            <option value="PhoneNumber">Phone number</option>
+        </select>
+        <input type="submit" class="btn btn-primary" name="Search" value="Search">
+    </form>
+</div>
 <table class="table">
     <thead class="thead-dark">
         <tr>
             <th>
-                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Name">
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Name" asp-route-TypeAction="@sort">
                     @Html.DisplayNameFor(model => model.Name)
                     @{
-                        String sort = ViewData["TypeAction"] != "desc" ? "asc" : "desc";
-
-
-                        switch (sort)
+                        if (sort == "desc" && colunmName == "Name")
                         {
-                            case "asc":
-                                <i class="fas fa-angle-down rotate-icon"></i>
-                                break;
-                            case "desc":
-                                <i class="fas fa-angle-up rotate-icon"></i>
-                                break;
+                            <i class="fas fa-angle-up rotate-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-angle-down rotate-icon"></i>
                         }
                     }
-
                 </a>
             </th>
             <th>
-                <a type="button" class="btn btn-dark">
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Surname" asp-route-TypeAction="@sort">
                     @Html.DisplayNameFor(model => model.Surname)
-                    <i class="fas fa-angle-down rotate-icon"></i>
+                    @{
+
+                        if (sort == "desc" && colunmName == "Surname")
+                        {
+                            <i class="fas fa-angle-up rotate-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-angle-down rotate-icon"></i>
+                        }
+
+                    }
                 </a>
             </th>
             <th>
 
-                <a type="button" class="btn btn-dark">
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Email" asp-route-TypeAction="@sort">
                     @Html.DisplayNameFor(model => model.Email)
-                    <i class="fas fa-angle-down rotate-icon"></i>
+                    @{
+                        if (sort == "desc" && colunmName == "Email")
+                        {
+
+                            <i class="fas fa-angle-up rotate-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-angle-down rotate-icon"></i>
+                        }
+                    }
                 </a>
             </th>
             <th>
-                <a type="button" class="btn btn-dark">
-                    Phone number
-                    <i class="fas fa-angle-down rotate-icon"></i>
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="PhoneNumber" asp-route-TypeAction="@sort">
+                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                    @{
+                        if (sort == "desc" && colunmName == "PhoneNumber")
+                        {
+                            <i class="fas fa-angle-up rotate-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-angle-down rotate-icon"></i>
+                        }
+                    }
                 </a>
             </th>
 

@@ -22,57 +22,111 @@ namespace CustomerManagementSystem.Repositories
 
         public int Create(Customer customer)
         {
-            return  _context.Database.ExecuteSqlRaw("exec sp_create_customer @Name,@Surname,@Email,@PhoneNumber", 
-                new SqlParameter("Name", customer.Name),
-                new SqlParameter("Surname", customer.Surname),
-                new SqlParameter("Email", customer.Email),
-                new SqlParameter("PhoneNumber", customer.PhoneNumber));
-        }
-
-        public int Delete(int id)
-        {
-            return _context.Database.ExecuteSqlRaw("exec sp_delete @Id ",new SqlParameter("Id", id));
-        }
-
-        public List<Customer> Read(int? id)
-        {
-
-            List<Customer> customers = new List<Customer>();
+            int IntCustomer;
             try
             {
-                if (id != null)
-                {
-                    customers = _context.Customer.FromSqlRaw("exec sp_customer @Id ", new SqlParameter("Id", id)).ToList();
-                }
-                else
-                {
-                    customers = _context.Customer.FromSqlRaw("exec sp_customers").ToList();
-                }
-                return customers;
+               IntCustomer =  _context.Database.ExecuteSqlRaw("exec sp_create_customer @Name,@Surname,@Email,@PhoneNumber",
+                    new SqlParameter("Name", customer.Name),
+                    new SqlParameter("Surname", customer.Surname),
+                    new SqlParameter("Email", customer.Email),
+                    new SqlParameter("PhoneNumber", customer.PhoneNumber));
             }
-            catch (Exception e) {
-                //Log error here (e)
+            catch (Exception ex) {
+                throw new Exception(ex.Message);
+            }
+            return IntCustomer;
 
-                return customers;
+        }
+
+        public int Delete(int? id)
+        {
+            int IntCustomer;
+
+            try {
+                IntCustomer = _context.Database.ExecuteSqlRaw("exec sp_delete @Id ", new SqlParameter("Id", id));
             }
-        
+            catch (Exception ex) {
+                throw new Exception(ex.Message);
+            }
+            return IntCustomer;
+        }
+
+
+
+        public List<Customer> Read()
+        {
+            List<Customer> customers;
+            try
+            {
+                customers = _context.Customer.FromSqlRaw("exec sp_customers").ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return customers;
+
+        }
+
+        public Customer ReadById(int? id)
+        {
+            List<Customer> customers;
+            try
+            {
+                customers = _context.Customer.FromSqlRaw("exec sp_customer @Id ", new SqlParameter("Id", id)).ToList();
+            } 
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return customers.FirstOrDefault();
+        }
+
+        public List<Customer> SearchCustomers(string ColunmName, string value)
+        {
+            List<Customer> customers;
+            try
+            {
+                customers = _context.Customer.FromSqlRaw("exec sp_customers_search @ColunmName, @Value ", new SqlParameter("ColunmName", ColunmName), new SqlParameter("Value", value)).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return customers;
         }
 
         public List<Customer> SortCustomers(string ColunmName, string type)
         {
-            var customers = _context.Customer.FromSqlRaw("exec sp_customers_ordered @ColunmName,@type ", new SqlParameter("ColunmName", ColunmName), new SqlParameter("type", type)).ToList();
+            List<Customer> customers;
+            try {
+                customers = _context.Customer.FromSqlRaw("exec sp_customers_ordered @ColunmName,@type ", new SqlParameter("ColunmName", ColunmName), new SqlParameter("type", type)).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
             return customers;
         }
 
         int ICustomer.Update(Customer customer, int id)
         {
-           var customer_ = _context.Database.ExecuteSqlRaw("exec sp_update @Id, @Name,@Surname,@Email,@PhoneNumber",
-              new SqlParameter("Id", id),
-              new SqlParameter("Name", customer.Name),
-              new SqlParameter("Surname", customer.Surname),
-              new SqlParameter("Email", customer.Email),
-              new SqlParameter("PhoneNumber", customer.PhoneNumber));
-            return customer_;
+            int IntCustomer;
+            try
+            {
+                IntCustomer = _context.Database.ExecuteSqlRaw("exec sp_update @Id, @Name,@Surname,@Email,@PhoneNumber",
+                   new SqlParameter("Id", id),
+                   new SqlParameter("Name", customer.Name),
+                   new SqlParameter("Surname", customer.Surname),
+                   new SqlParameter("Email", customer.Email),
+                   new SqlParameter("PhoneNumber", customer.PhoneNumber));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
+            return IntCustomer;
         }
     }
 }

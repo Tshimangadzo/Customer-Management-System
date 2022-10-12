@@ -24,25 +24,25 @@ namespace CustomerManagementSystem.Controllers
 
         // GET: Customers
         [Authorize]
-        public IActionResult Index(string ColunmName, string ActionName, string TypeAction)
+        public IActionResult Index(string ColunmName, string TypeAction,string SearchColunmName,string searchValue)
         {
-            List<Customer> customers = null;
+            List<Customer> customers;
 
-            if (String.IsNullOrEmpty(ColunmName)
-                && String.IsNullOrEmpty(ActionName)
-                && String.IsNullOrEmpty(TypeAction))
+            if (String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(TypeAction) && String.IsNullOrEmpty(SearchColunmName))
             {
-                customers = _repositoryCustomer.Read(null);
-                return View(customers);
+                customers = _repositoryCustomer.Read();
             }
-
-            if (ColunmName != null) {
-                customers = _repositoryCustomer.Read(null);
+            else if (!String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(SearchColunmName))
+            {
+                TypeAction = TypeAction == null ? "asc" : TypeAction == "asc"?"desc":"asc";
+                customers = _repositoryCustomer.SortCustomers(ColunmName, TypeAction);
             }
-
+            else{
+                customers = _repositoryCustomer.SearchCustomers(SearchColunmName, searchValue);
+            }
             ViewData["TypeAction"] = TypeAction;
+            ViewData["ColunmName"] = ColunmName;
             return View(customers);
-
         }
 
         // GET: Customers/Details/5
@@ -54,7 +54,7 @@ namespace CustomerManagementSystem.Controllers
                 return NotFound();
             }
 
-            var customer = _repositoryCustomer.Read(id).FirstOrDefault();
+            Customer customer = _repositoryCustomer.ReadById(id);
             if (customer == null)
             {
                 return NotFound();
@@ -98,7 +98,7 @@ namespace CustomerManagementSystem.Controllers
                 return NotFound();
             }
 
-            var customer = _repositoryCustomer.Read(id).FirstOrDefault();
+            var customer = _repositoryCustomer.ReadById(id);
             if (customer == null)
             {
                 return NotFound();
@@ -152,13 +152,13 @@ namespace CustomerManagementSystem.Controllers
                 return NotFound();
             }
 
-            var customer = _repositoryCustomer.Read(id);
+            Customer customer = _repositoryCustomer.ReadById(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            return View(customer.FirstOrDefault());
+            return View(customer);
         }
 
         // POST: Customers/Delete/5
@@ -175,9 +175,7 @@ namespace CustomerManagementSystem.Controllers
         [Authorize]
         private bool CustomerExists(int id)
         {
-            var customer = _repositoryCustomer.Read(id);
-            //return _context.Customer.Any(e => e.Id == id);
-            return true;
+            return _repositoryCustomer.ReadById(id).Id == id;
         }
     }
 }
