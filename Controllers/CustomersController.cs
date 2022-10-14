@@ -9,40 +9,77 @@ using CustomerManagementSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using CustomerManagementSystem.Repositories;
 using CustomerManagementSystem.Interfaces;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Net.Http.Headers;
+using CustomerManagementSystem.pagination;
+using Microsoft.Extensions.Configuration;
+
 
 namespace CustomerManagementSystem.Controllers
 {
     public class CustomersController : Controller
     {
         private readonly ICustomer _repositoryCustomer;
+        private readonly IConfiguration _configuration;
 
-        public CustomersController(ICustomer repositoryCustomer)
+        public CustomersController(ICustomer repositoryCustomer,IConfiguration configuration)
         {
 
             _repositoryCustomer = repositoryCustomer;
+            _configuration = configuration;
         }
 
+
+        public IActionResult ProcessCsv(IFormFile file) {
+            if (file != null)
+            {
+                using (var fileStream = file.OpenReadStream())
+                using (var reader = new StreamReader(fileStream))
+                {
+                    string row;
+                    while ((row = reader.ReadLine()) != null)
+                    {
+                        Console.WriteLine("I am row {0}", row);
+                    }
+                }
+            }
+            return new ObjectResult(new { status = "fail" });
+        }
+
+
+        //(string sortOrder, string currentFilter, string searchString, int? page)
         // GET: Customers
         [Authorize]
-        public IActionResult Index(string ColunmName, string TypeAction,string SearchColunmName,string searchValue)
+        public ViewResult Index(string ColunmName, string sortOrder, string SearchColunmName, string searchValue, int? pageIndex)
         {
+
+            // string sortOrder,
+            // string currentFilter, string searchString, int? pageIndex
+
             List<Customer> customers;
 
-            if (String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(TypeAction) && String.IsNullOrEmpty(SearchColunmName))
+            if (!String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(SearchColunmName))
+            {
+                sortOrder = sortOrder == null ? "asc" : sortOrder == "asc" ? "desc" : "asc";
+                customers = _repositoryCustomer.SortCustomers(ColunmName, sortOrder);
+            }
+            else if (!String.IsNullOrEmpty(SearchColunmName) && !String.IsNullOrEmpty(searchValue))
+            {
+                customers = _repositoryCustomer.SearchCustomers(SearchColunmName, searchValue);
+            }
+            else
             {
                 customers = _repositoryCustomer.Read();
             }
-            else if (!String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(SearchColunmName))
-            {
-                TypeAction = TypeAction == null ? "asc" : TypeAction == "asc"?"desc":"asc";
-                customers = _repositoryCustomer.SortCustomers(ColunmName, TypeAction);
-            }
-            else{
-                customers = _repositoryCustomer.SearchCustomers(SearchColunmName, searchValue);
-            }
-            ViewData["TypeAction"] = TypeAction;
+
+            ViewData["sortOrder"] = sortOrder;
             ViewData["ColunmName"] = ColunmName;
+            var pageSize = _configuration.GetValue("PageSize", 4);
+            //  customers = await PaginatedList<Customer>.CreateAsync(customers, pageIndex ?? 1, pageSize);
+
             return View(customers);
+
         }
 
         // GET: Customers/Details/5
@@ -71,13 +108,20 @@ namespace CustomerManagementSystem.Controllers
             return View();
         }
 
+        public IActionResult CreateCustomers()
+        {
+
+            return View();
+        }
+
+
         // POST: Customers/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create([Bind("Id,Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
+        public IActionResult Create([Bind("Id,Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
         {
             if (ModelState.IsValid)
             {
@@ -85,7 +129,7 @@ namespace CustomerManagementSystem.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
- 
+
             return View(customer);
         }
 

@@ -1,17 +1,20 @@
 ﻿@model IEnumerable<CustomerManagementSystem.Models.Customer>
+@using PagedList.Mvc;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
 
 @{
     ViewData["Title"] = "View customers";
 }
 
 @{
-    String sort = ViewData["TypeAction"] == null ? "": ViewData["TypeAction"].ToString();
+    String sort = ViewData["sortOrder"] == null ? "" : ViewData["sortOrder"].ToString();
     String colunmName = ViewData["ColunmName"] == null ? "" : ViewData["ColunmName"].ToString();
 }
 <div style="margin-bottom:20px">
-    <a button type="button" class="btn btn-primary" asp-action="Create">Create New Customer</a>
+    <a button type="button" class="btn btn-primary" asp-action="CreateCustomers">Create new customer(s)</a>
     <form class="float-right" method="post" asp-action="Index">
-        <input name="searchValue"  />
+        <input name="searchValue" />
         <select name="SearchColunmName">
             <option value="">Search by</option>
             <option value="Name">Name</option>
@@ -26,8 +29,23 @@
     <thead class="thead-dark">
         <tr>
             <th>
-                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Name" asp-route-TypeAction="@sort">
-                    @Html.DisplayNameFor(model => model.Name)
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Id" asp-route-sortOrder="@sort">
+                    Index
+                    @{
+                        if (sort == "desc" && colunmName == "Id")
+                        {
+                            <i class="fas fa-angle-up rotate-icon"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-angle-down rotate-icon"></i>
+                        }
+                    }
+                </a>
+            </th>
+            <th>
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Name" asp-route-sortOrder="@sort">
+                    Name
                     @{
                         if (sort == "desc" && colunmName == "Name")
                         {
@@ -41,8 +59,8 @@
                 </a>
             </th>
             <th>
-                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Surname" asp-route-TypeAction="@sort">
-                    @Html.DisplayNameFor(model => model.Surname)
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Surname" asp-route-sortOrder="@sort">
+                    Surname
                     @{
 
                         if (sort == "desc" && colunmName == "Surname")
@@ -59,8 +77,8 @@
             </th>
             <th>
 
-                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Email" asp-route-TypeAction="@sort">
-                    @Html.DisplayNameFor(model => model.Email)
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Email" asp-route-sortOrder="@sort">
+                    Email
                     @{
                         if (sort == "desc" && colunmName == "Email")
                         {
@@ -75,8 +93,8 @@
                 </a>
             </th>
             <th>
-                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="PhoneNumber" asp-route-TypeAction="@sort">
-                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="PhoneNumber" asp-route-sortOrder="@sort">
+                    Phone number
                     @{
                         if (sort == "desc" && colunmName == "PhoneNumber")
                         {
@@ -96,7 +114,11 @@
     <tbody>
         @foreach (var item in Model)
         {
+            String phoneNumber = String.Concat("+27", Convert.ToString(item.PhoneNumber));
             <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
@@ -107,7 +129,8 @@
                     @Html.DisplayFor(modelItem => item.Email)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.PhoneNumber)
+                   
+                    @Html.DisplayFor(modelItem => phoneNumber)
                 </td>
 
                 <td>
@@ -119,3 +142,6 @@
         }
     </tbody>
 </table>
+
+
+
