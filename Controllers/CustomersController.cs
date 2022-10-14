@@ -14,7 +14,11 @@ using System.IO;
 using System.Net.Http.Headers;
 using CustomerManagementSystem.pagination;
 using Microsoft.Extensions.Configuration;
-
+using Microsoft.AspNetCore.Hosting;
+using LumenWorks.Framework.IO.Csv;
+using System.Data;
+using CustomerManagementSystem.Support;
+using System.Text;
 
 namespace CustomerManagementSystem.Controllers
 {
@@ -22,29 +26,63 @@ namespace CustomerManagementSystem.Controllers
     {
         private readonly ICustomer _repositoryCustomer;
         private readonly IConfiguration _configuration;
+        [Obsolete]
+        private readonly IHostingEnvironment _hostingEnvironment;
 
-        public CustomersController(ICustomer repositoryCustomer,IConfiguration configuration)
+
+
+        [Obsolete]
+        public CustomersController(ICustomer repositoryCustomer,
+                                   IConfiguration configuration,IHostingEnvironment hostingEnvironment)
         {
 
             _repositoryCustomer = repositoryCustomer;
             _configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
         }
 
-
-        public IActionResult ProcessCsv(IFormFile file) {
-            if (file != null)
+        /*
+           if (ModelState.IsValid)
             {
-                using (var fileStream = file.OpenReadStream())
-                using (var reader = new StreamReader(fileStream))
+               
+                  Stream stream = upload.InputStream;
+                  DataTable csvTable = new DataTable();
+                  using (CsvReader csvReader =
+                               new CsvReader(new StreamReader(stream), true))
+                  {
+                    csvTable.Load(csvReader);
+                   }
+                  return View(csvTable);
+
+            }
+            return View();
+         */
+
+        [Obsolete]
+        public IActionResult ProcessCsv(List<IFormFile> file)
+        {
+
+
+            
+            string path = Path.Combine(_hostingEnvironment.WebRootPath, "Uploads");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            List<string> uploadedFiles = new List<string>();
+            foreach (IFormFile postedFile in file)
+            {
+                string fileName = Path.GetFileName(postedFile.FileName);
+                using (FileStream stream = new FileStream(Path.Combine(path, fileName), FileMode.Create))
                 {
-                    string row;
-                    while ((row = reader.ReadLine()) != null)
-                    {
-                        Console.WriteLine("I am row {0}", row);
-                    }
+                    postedFile.CopyTo(stream);
+                    uploadedFiles.Add(fileName);
+                    ViewBag.Message += string.Format("<b>{0}</b> uploaded.<br />", fileName);
                 }
             }
-            return new ObjectResult(new { status = "fail" });
+
+            return View();
         }
 
 
@@ -108,6 +146,7 @@ namespace CustomerManagementSystem.Controllers
             return View();
         }
 
+        [Authorize]
         public IActionResult CreateCustomers()
         {
 

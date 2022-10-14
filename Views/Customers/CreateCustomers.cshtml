@@ -11,7 +11,6 @@
                 <th></th>
                 <th>Upload csv to create customer</th>
             </tr>
-
         </thead>
         <tbody>
             <tr>
@@ -20,14 +19,12 @@
                 </td>
                 <td></td>
                 <td>
-                    <input type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="btn btn-primary" id="csvFile" asp-action="Create" value="Upload csv file">
+                    <input type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="btn btn-primary" id="csvFile" asp-action="Create" value="Upload csv file">
                     <button type="button" class="btn btn-primary" onclick="submitCsv()">Submit</button>
                 </td>
             </tr>
         </tbody>
-
     </table>
-
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="~/lib/csv-form/CsvForm.js"></script>
