@@ -7,15 +7,19 @@
     ViewData["Title"] = "Home Page";
 }
 
-@if (SignInManager.IsSignedIn(User))
-{
-    Context.Response.Redirect("Customers");
+@*if (SignInManager.IsSignedIn(User))
+    {
+        Context.Response.Redirect("Customers");
 
-}
-else
-{
-    <div class="text-center">
-        <h1 class="display-4">Welcome</h1>
-        <p class="display-4">Customer management portal</p>
-    </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h1 class="display-4">Welcome</h1>
+            <p class="display-4">Customer management portal</p>
+        </div>
+    }*@
+
+@{ 
+    Context.Response.Redirect("Customers");
 }

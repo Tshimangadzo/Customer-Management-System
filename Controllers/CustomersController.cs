@@ -14,7 +14,12 @@ using System.IO;
 using System.Net.Http.Headers;
 using CustomerManagementSystem.pagination;
 using Microsoft.Extensions.Configuration;
-
+using Microsoft.AspNetCore.Hosting;
+using LumenWorks.Framework.IO.Csv;
+using System.Data;
+using CustomerManagementSystem.Support;
+using System.Text;
+using ExcelDataReader;
 
 namespace CustomerManagementSystem.Controllers
 {
@@ -22,59 +27,83 @@ namespace CustomerManagementSystem.Controllers
     {
         private readonly ICustomer _repositoryCustomer;
         private readonly IConfiguration _configuration;
+        [Obsolete]
+        private readonly IHostingEnvironment _hostingEnvironment;
 
-        public CustomersController(ICustomer repositoryCustomer,IConfiguration configuration)
+    
+
+        [Obsolete]
+        public CustomersController(ICustomer repositoryCustomer,
+                                   IConfiguration configuration,IHostingEnvironment hostingEnvironment)
         {
 
             _repositoryCustomer = repositoryCustomer;
             _configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
         }
-
-
-        public IActionResult ProcessCsv(IFormFile file) {
+      
+        [HttpPost]
+        [Obsolete]
+        public List<Customer> ProcessCsv(IFormFile file)
+        {
+            List<Customer> customers = new List<Customer>();
             if (file != null)
             {
-                using (var fileStream = file.OpenReadStream())
-                using (var reader = new StreamReader(fileStream))
+                string path = Path.Combine(_hostingEnvironment.WebRootPath, "Uploads");
+                string fileName = Path.GetFileName(file.FileName);
+                bool isFileSaved = SaveFile(file, path, fileName);
+
+                if (isFileSaved)
                 {
-                    string row;
-                    while ((row = reader.ReadLine()) != null)
-                    {
-                        Console.WriteLine("I am row {0}", row);
-                    }
+                    customers = GetCustomers(path, fileName);
                 }
             }
-            return new ObjectResult(new { status = "fail" });
+
+            return customers;
         }
 
 
-        //(string sortOrder, string currentFilter, string searchString, int? page)
         // GET: Customers
-        [Authorize]
-        public ViewResult Index(string ColunmName, string sortOrder, string SearchColunmName, string searchValue, int? pageIndex)
+        
+        public ViewResult Index(string ColunmName,
+                                string sortOrder, 
+                                string SearchColunmName, 
+                                string searchValue, 
+                                int? pageIndex,
+                                List<Customer> _customers)
         {
 
             // string sortOrder,
             // string currentFilter, string searchString, int? pageIndex
-
             List<Customer> customers;
 
-            if (!String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(SearchColunmName))
+            if (_customers.Count() > 0)
             {
-                sortOrder = sortOrder == null ? "asc" : sortOrder == "asc" ? "desc" : "asc";
-                customers = _repositoryCustomer.SortCustomers(ColunmName, sortOrder);
-            }
-            else if (!String.IsNullOrEmpty(SearchColunmName) && !String.IsNullOrEmpty(searchValue))
-            {
-                customers = _repositoryCustomer.SearchCustomers(SearchColunmName, searchValue);
+                ViewBag.isClicked = true;
+                ViewBag.uploaded = true;
+                customers = _customers;
             }
             else
             {
-                customers = _repositoryCustomer.Read();
-            }
 
+
+                if (!String.IsNullOrEmpty(ColunmName) && String.IsNullOrEmpty(SearchColunmName))
+                {
+                    sortOrder = sortOrder == null ? "asc" : sortOrder == "asc" ? "desc" : "asc";
+                    customers = _repositoryCustomer.SortCustomers(ColunmName, sortOrder);
+                }
+                else if (!String.IsNullOrEmpty(SearchColunmName) && !String.IsNullOrEmpty(searchValue))
+                {
+                    customers = _repositoryCustomer.SearchCustomers(SearchColunmName, searchValue);
+                }
+                else
+                {
+                    customers = _repositoryCustomer.Read();
+                }
+            }
             ViewData["sortOrder"] = sortOrder;
             ViewData["ColunmName"] = ColunmName;
+            ViewBag.uploaded = false;
             var pageSize = _configuration.GetValue("PageSize", 4);
             //  customers = await PaginatedList<Customer>.CreateAsync(customers, pageIndex ?? 1, pageSize);
 
@@ -82,8 +111,99 @@ namespace CustomerManagementSystem.Controllers
 
         }
 
+        
+        [Route("Customers/processCsv")]
+        [Obsolete]
+        [HttpPost]
+        public ViewResult GetCustomers(IFormFile file)
+        {
+            List<Customer> customers;
+            if (file != null)
+            {
+                customers = ProcessCsv(file);
+               
+            }
+            else
+            {
+                customers = new List<Customer>();
+            }
+
+            return Index(null,null,null,null,0,customers);
+        }
+
+     
+
+        
+        public IActionResult CreateCustomers(List<Customer> customers)
+        {
+            ViewData["customers"] = customers;
+            return View(customers);
+        }
+
+        private static List<Customer> GetCustomers(string path,string fileName) {
+                List<Customer> customers = new List<Customer>();
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                using (var stream = System.IO.File.Open(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read))
+                {
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    {
+                    int createId = 0;
+                        while (reader.Read())
+                    {
+                        if (reader.GetValue(0) != null && 
+                            reader.GetValue(1) != null && 
+                            reader.GetValue(2) != null && 
+                            reader.GetValue(3) != null)
+                        {
+                            if (reader.GetValue(3).GetType().Name != "String")
+                            {
+                                customers.Add(new Customer
+                                {
+                                    Id = createId,
+                                    Name = reader.GetValue(0).ToString(),
+                                    Surname = reader.GetValue(1).ToString(),
+                                    Email = reader.GetValue(2).ToString(),
+                                    PhoneNumber = Convert.ToInt32(reader.GetValue(3))
+                                });
+                                createId++;
+                            }
+
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                }
+                }
+
+            return customers;
+        }
+
+        private static bool SaveFile(IFormFile file,string path,string fileName) {
+        
+            bool isFileSaved = false;
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            List<string> uploadedFiles = new List<string>();
+
+            
+            using (FileStream stream = new FileStream(Path.Combine(path, fileName), FileMode.Create))
+            {
+                file.CopyTo(stream);
+                uploadedFiles.Add(fileName);
+                isFileSaved = true;
+            }
+            return isFileSaved;
+
+        }
+
+       
+
         // GET: Customers/Details/5
-        [Authorize]
+        
         public IActionResult Details(int? id)
         {
             if (id == null)
@@ -101,18 +221,13 @@ namespace CustomerManagementSystem.Controllers
         }
 
         // GET: Customers/Create
-        [Authorize]
+        
         public IActionResult Create()
         {
          
             return View();
         }
-
-        public IActionResult CreateCustomers()
-        {
-
-            return View();
-        }
+       
 
 
         // POST: Customers/Create
@@ -120,8 +235,8 @@ namespace CustomerManagementSystem.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public IActionResult Create([Bind("Id,Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
+        
+        public IActionResult Create([Bind("Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
         {
             if (ModelState.IsValid)
             {
@@ -134,7 +249,7 @@ namespace CustomerManagementSystem.Controllers
         }
 
         // GET: Customers/Edit/5
-        [Authorize]
+        
         public IActionResult Edit(int? id)
         {
             if (id == null)
@@ -155,7 +270,7 @@ namespace CustomerManagementSystem.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
+        
         public IActionResult Edit(int id, [Bind("Id,Name,Surname,Email,PhoneNumber,AddressId")] Customer customer)
         {
             if (id != customer.Id)
@@ -187,7 +302,7 @@ namespace CustomerManagementSystem.Controllers
         }
 
         // GET: Customers/Delete/5
-        [Authorize]
+        
         public IActionResult Delete(int? id)
         {
 
@@ -208,7 +323,7 @@ namespace CustomerManagementSystem.Controllers
         // POST: Customers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize]
+        
         public IActionResult DeleteConfirmed(int id)
         {
 
@@ -216,7 +331,7 @@ namespace CustomerManagementSystem.Controllers
             return RedirectToAction(nameof(Index));
 
         }
-        [Authorize]
+        
         private bool CustomerExists(int id)
         {
             return _repositoryCustomer.ReadById(id).Id == id;
