@@ -155,54 +155,55 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create customer(s) form</h5>
+                    <h4 class="modal-title">Create customer(s) form</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="container">
 
-                        <div class="col">
-                            <h2> Upload csv to create customer</h2>
-                        </div>
-
-                        <div class="row">
-                            <input onchange="submitCsv()" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="col-6 btn btn-primary p-3" id="csvFile" asp-action="Create" value="Upload csv file">
-                        </div>
+                    <div style="margin-top:20px">
+                        <h6>Upload csv to create customer</h6>
                     </div>
 
+                    <div class="container">
+                        <div class="row">
+                            <input onchange="submitCsv()" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="col btn btn-primary" id="csvFile" asp-action="Create" value="Upload csv file">
+                        </div>
+                    </div>
+                    <br />
                     @{if (isClickedManual)
                         {
-                            <div class="col"> <h2>Create customer manual</h2></div>
+                            <div style="margin-top:20px;">
+                                <div> <h6>Create customer manual</h6></div>
 
-                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                            <div class="form-group">
-                                <label class="control-label">Name</label>
-                                <input name="Name" class="form-control" />
+                                <div class="form-group">
+                                    <label class="control-label">Name</label>
+                                    <input name="Name" class="form-control" />
+
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Surname</label>
+                                    <input name="Surname" class="form-control" />
+
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Email</label>
+                                    <input name="Email" class="form-control" />
+
+                                </div>
+                                <div class="form-group">
+                                    <label class="control-label">Phone number </label>
+                                    <input name="PhoneNumber" class="form-control" />
+
+                                </div>
+                                @*<div class="form-group">
+                        <input type="submit" value="Create" class="btn btn-primary" />
+                    </div>*@
 
                             </div>
-                            <div class="form-group">
-                                <label class="control-label">Surname</label>
-                                <input name="Surname" class="form-control" />
-
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">Email</label>
-                                <input name="Email" class="form-control" />
-
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">Phone number </label>
-                                <input name="PhoneNumber" class="form-control" />
-
-                            </div>
-                            <div class="form-group">
-                                <input type="submit" value="Create" class="btn btn-primary" />
-                            </div>
-
-
                         }
                         else if (ViewBag.uploaded == true)
                         {
@@ -238,7 +239,7 @@
                     }
 
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <button type="submit" class="btn btn-primary">Save customer(s)</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
