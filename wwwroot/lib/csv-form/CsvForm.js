@@ -7,7 +7,7 @@ function submitCsv() {
 	     }
 
 	    const files = $('#csvFile').get(0).files;
-	    const url = "ProcessCsv";
+	const url = "Customers/processCsv";
 		var formData = new FormData();
 		formData.append("file", files[0]);
 
@@ -20,12 +20,10 @@ function submitCsv() {
 			contentType: false,
 			processData: false,
 			success: function (repo) {
-				if (repo.status == "success") {
-					alert("File : " + repo.filename + " is uploaded successfully");
-				}
+				console.log(repo)
 			},
 			error: function (err) {
-				alert("Error occurs : ", err);
+				console.log(err)
 			}
 		}
 

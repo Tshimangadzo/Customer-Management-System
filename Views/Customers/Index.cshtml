@@ -1,7 +1,4 @@
 ﻿@model IEnumerable<CustomerManagementSystem.Models.Customer>
-@using PagedList.Mvc;
-<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
-
 
 @{
     ViewData["Title"] = "View customers";
@@ -12,7 +9,7 @@
     String colunmName = ViewData["ColunmName"] == null ? "" : ViewData["ColunmName"].ToString();
 }
 <div style="margin-bottom:20px">
-    <a button type="button" class="btn btn-primary" asp-action="CreateCustomers">Create new customer(s)</a>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createCustomerModal">Create new customer(s)</button>
     <form class="float-right" method="post" asp-action="Index">
         <input name="searchValue" />
         <select name="SearchColunmName">
@@ -25,7 +22,7 @@
         <input type="submit" class="btn btn-primary" name="Search" value="Search">
     </form>
 </div>
-<table class="table">
+<table class="table table-bordered table-striped text-center">
     <thead class="thead-dark">
         <tr>
             <th>
@@ -45,7 +42,7 @@
             </th>
             <th>
                 <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Name" asp-route-sortOrder="@sort">
-                    Name
+                    @Html.DisplayNameFor(model => model.Name)
                     @{
                         if (sort == "desc" && colunmName == "Name")
                         {
@@ -60,7 +57,7 @@
             </th>
             <th>
                 <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Surname" asp-route-sortOrder="@sort">
-                    Surname
+                    @Html.DisplayNameFor(model => model.Surname)
                     @{
 
                         if (sort == "desc" && colunmName == "Surname")
@@ -78,7 +75,7 @@
             <th>
 
                 <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="Email" asp-route-sortOrder="@sort">
-                    Email
+                    @Html.DisplayNameFor(model => model.Email)
                     @{
                         if (sort == "desc" && colunmName == "Email")
                         {
@@ -94,7 +91,7 @@
             </th>
             <th>
                 <a asp-action="Index" type="button" class="btn btn-dark" asp-route-ColunmName="PhoneNumber" asp-route-sortOrder="@sort">
-                    Phone number
+                    @Html.DisplayNameFor(model => model.PhoneNumber)
                     @{
                         if (sort == "desc" && colunmName == "PhoneNumber")
                         {
@@ -107,8 +104,11 @@
                     }
                 </a>
             </th>
-
-            <th></th>
+            <th>
+                <a class="btn btn-dark">
+                    Actions
+                </a>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -129,7 +129,7 @@
                     @Html.DisplayFor(modelItem => item.Email)
                 </td>
                 <td>
-                   
+
                     @Html.DisplayFor(modelItem => phoneNumber)
                 </td>
 
@@ -143,5 +143,111 @@
     </tbody>
 </table>
 
+@{
+
+    bool isClickedManual = ViewBag.isClicked == null || false ? true : false;
+
+}
 
 
+<form method="post" asp-action="Index" asp-controller="Home">
+    <div id="createCustomerModal" class="modal" tabindex="-1" role="dialog" style="width:100%">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create customer(s) form</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+
+                        <div class="col">
+                            <h2> Upload csv to create customer</h2>
+                        </div>
+
+                        <div class="row">
+                            <input onchange="submitCsv()" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="col-6 btn btn-primary p-3" id="csvFile" asp-action="Create" value="Upload csv file">
+                        </div>
+                    </div>
+
+                    @{if (isClickedManual)
+                        {
+                            <div class="col"> <h2>Create customer manual</h2></div>
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="form-group">
+                                <label class="control-label">Name</label>
+                                <input name="Name" class="form-control" />
+
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Surname</label>
+                                <input name="Surname" class="form-control" />
+
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Email</label>
+                                <input name="Email" class="form-control" />
+
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Phone number </label>
+                                <input name="PhoneNumber" class="form-control" />
+
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                            </div>
+
+
+                        }
+                        else if (ViewBag.uploaded == true)
+                        {
+                            @foreach (var item in Model)
+                            {
+                                String phoneNumber = String.Concat("+27", Convert.ToString(item.PhoneNumber));
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Surname)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Email)
+                                    </td>
+                                    <td>
+
+                                        @Html.DisplayFor(modelItem => phoneNumber)
+                                    </td>
+
+                                    <td>
+                                        <a type="button" class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                        <a type="button" class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                                        <a type="button" class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="~/lib/csv-form/CsvForm.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

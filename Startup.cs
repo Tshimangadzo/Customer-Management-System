@@ -39,16 +39,19 @@ namespace CustomerManagementSystem
                     Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<ICustomer, RepositoryCustomer>();
-   
+
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddControllersWithViews();
-            services.AddRazorPages();
+            services.AddControllersWithViews().AddSessionStateTempDataProvider(); ;
+            services.AddRazorPages().AddSessionStateTempDataProvider();
+            services.AddDistributedMemoryCache();
+            services.AddMemoryCache();
+            services.AddSession();
+            services.AddMvc();
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+            // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -68,7 +71,7 @@ namespace CustomerManagementSystem
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
                
